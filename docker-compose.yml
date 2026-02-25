@@ -1,0 +1,59 @@
+services:
+  # ------------------------
+  # 1️ Base de datos MySQL
+  # ------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: employees-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: employeesdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: app123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - employees-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  # ------------------------
+  # 2️ ms-epmloyees
+  # ------------------------
+  employee-ms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: employee-ms
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/employeesdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: appuser
+      SPRING_DATASOURCE_PASSWORD: app123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_PROFILES_ACTIVE: dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - employees-network
+
+# ------------------------
+# Volúmenes persistentes
+# ------------------------
+volumes:
+  mysql_data:
+
+# ------------------------
+# Red interna
+# ------------------------
+networks:
+  employees-network:
+    driver: bridge
