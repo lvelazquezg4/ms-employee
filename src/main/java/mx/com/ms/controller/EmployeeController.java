@@ -1,7 +1,7 @@
 package mx.com.ms.controller;
 
 /**
- * @project ms-employees
+ * @project ms-employees updated
  * @created 25/02/2026
  * @author lvg
  */
@@ -49,8 +49,8 @@ public class EmployeeController {
 	    @ApiResponse(responseCode = "400", description = "Invalid fields"),
 	})
 	@GetMapping
-	public ResponseEntity<List<EmployeeResponseDTO>> getAllEmployees() {
-		return ResponseEntity.ok(service.findAll());
+	public ResponseEntity<Void>  getAllEmployees() {
+		return ResponseEntity.noContent().build(); //service.findAll()  ResponseEntity<List<EmployeeResponseDTO>>
 	}
 	
 	@Operation(summary = "Get employee",
